@@ -1,0 +1,36 @@
+{
+  "name": "tinder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon api/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hammad-scripted/Tinder.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/hammad-scripted/Tinder/issues"
+  },
+  "homepage": "https://github.com/hammad-scripted/Tinder#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.10.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.9.1",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "chalk": "^6.0.0",
+    "nodemon": "^3.1.14"
+  }
+}
