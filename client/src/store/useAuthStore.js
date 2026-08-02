@@ -1,27 +1,33 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
+
 export const useAuthStore = create((set) => ({
   //* states
-
   authUser: null,
-  checkingAuth: true,
+  checkingAuth: true, // Initialized to true on page load
   loading: false,
 
   //* actions
 
+  // 1. Silent Auth Check on page load
   checkAuth: async () => {
     try {
+      set({ checkingAuth: true, loading: true });
       const response = await axiosInstance.get('/auth/me');
-      set({ authUser: response.data, checkingAuth: false });
-      console.log(response.data);
-      toast.success('Logged in successfully');
+
+      // Extract user object safely (handles response.data.user or response.data)
+      const user = response.data.user || response.data;
+      set({ authUser: user, checkingAuth: false, loading: false});
     } catch (error) {
-      console.log(error);
-      set({ checkingAuth: false });
-      toast.error(error.response.data.message);
+      console.error('CheckAuth Error:', error);
+      set({ authUser: null, checkingAuth: false });
+    }finally{
+      set({ loading: false });
     }
   },
+
+  // 2. Signup Action
   signup: async ({ name, email, password, age, gender, genderPreference }) => {
     try {
       set({ loading: true });
@@ -33,15 +39,24 @@ export const useAuthStore = create((set) => ({
         gender,
         genderPreference,
       });
-      set({ authUser: response.data, loading: false });
-      console.log(response.data);
-      toast.success('Registered successfully');
+
+      const user = response.data.user || response.data;
+      set({ authUser: user, loading: false });
+
+      toast.success('Account created successfully!');
     } catch (error) {
-      console.log(error);
+      console.error('Signup Error:', error);
       set({ loading: false });
-      toast.error(error.response.data.message);
+
+      const errorMessage =
+        error.response?.data?.message || 'Failed to create account';
+      toast.error(errorMessage);
+    }finally{
+      set({ loading: false });
     }
   },
+
+  // 3. Login Action
   login: async ({ email, password }) => {
     try {
       set({ loading: true });
@@ -49,24 +64,34 @@ export const useAuthStore = create((set) => ({
         email,
         password,
       });
-      set({ authUser: response.data, loading: false });
-      console.log(response.data);
+
+      const user = response.data.user || response.data;
+      set({ authUser: user, loading: false });
+
       toast.success('Logged in successfully');
     } catch (error) {
-      console.log(error);
+      console.error('Login Error:', error);
       set({ loading: false });
-      toast.error(error.response.data.message);
+
+      const errorMessage =
+        error.response?.data?.message || 'Invalid email or password';
+      toast.error(errorMessage);
+    }finally{
+      set({ loading: false });
     }
   },
+
+  // 4. Logout Action
   logout: async () => {
     try {
-      const response = await axiosInstance.get('/auth/logout');
+      await axiosInstance.post('/auth/logout');
       set({ authUser: null });
-      console.log(response.data);
       toast.success('Logged out successfully');
     } catch (error) {
-      console.log(error);
-      toast.error(error.response.data.message);
+      console.error('Logout Error:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to log out';
+      toast.error(errorMessage);
     }
   },
 }));
