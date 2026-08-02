@@ -2,6 +2,7 @@ import 'dotenv/config'; // 👈 Loads .env BEFORE other imports execute!
 import dns from 'node:dns/promises';
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { authRouter } from './routes/auth.route.js';
 import { usersRouter } from './routes/users.route.js';
 import { matchesRouter } from './routes/matches.route.js';
@@ -14,6 +15,7 @@ const app = express();
 // ? MIDDLEWARES
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser(process.env.JWT_SECRET));
 
 // ? ROUTES
 app.use('/api/auth', authRouter);
