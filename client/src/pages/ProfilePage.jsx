@@ -21,6 +21,7 @@ const ProfilePage = () => {
     updateProfile({ name, bio, age, gender, genderPreference, image });
   };
 
+  // base64 image logic
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -33,7 +34,6 @@ const ProfilePage = () => {
     }
   };
 
-  console.log(image);
 
   return (
     <div className='min-h-screen bg-gray-50 flex flex-col'>

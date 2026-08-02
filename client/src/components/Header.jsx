@@ -5,6 +5,7 @@ import { Flame, User, LogOut, Menu } from "lucide-react";
 
 export const Header = () => {
     const { authUser, logout } = useAuthStore();
+    
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const dropdownRef = useRef(null);
