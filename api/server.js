@@ -9,13 +9,33 @@ import { matchesRouter } from './routes/matches.route.js';
 import { messagesRouter } from './routes/messages.route.js';
 import chalk from 'chalk';
 import { connectDB } from './db/connect.js';
-
+import cors from 'cors';
+import morgan from 'morgan';
 const app = express();
 
 // ? MIDDLEWARES
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.JWT_SECRET));
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+    methods: [
+      'GET',
+      'POST',
+      'PUT',
+      'DELETE',
+      'OPTIONS',
+      'HEAD',
+      'CONNECT',
+      'TRACE',
+      'PATCH',
+    ],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }),
+);
+app.use(morgan('dev'));
 
 // ? ROUTES
 app.use('/api/auth', authRouter);
