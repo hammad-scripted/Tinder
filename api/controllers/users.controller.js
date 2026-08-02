@@ -4,7 +4,7 @@ export const updateProfile = async (req, res) => {
   try {
     const { image, ...otherFields } = req.body;
 
-    let updatedData = { ...otherFields };
+    let updatedData =otherFields;
 
     if (image) {
       //? base64 image data is sent in the request body, you can handle it here
