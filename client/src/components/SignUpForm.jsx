@@ -9,14 +9,14 @@ const SignUpForm = () => {
     const [age, setAge] = useState("");
     const [genderPreference, setGenderPreference] = useState("");
 
-    // const { signup, loading } = useAuthStore();
-const loading=false;
+    const { signup, loading } = useAuthStore();
+
     return (
         <form
             className='space-y-6'
             onSubmit={(e) => {
                 e.preventDefault();
-                // signup({ name, email, password, gender, age, genderPreference });
+                signup({ name, email, password, gender, age, genderPreference });
             }}
         >
             {/* NAME */}

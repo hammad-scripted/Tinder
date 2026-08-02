@@ -5,15 +5,14 @@ const LoginForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    // const { login, loading } = useAuthStore();
-const loading=false;
-const login=()=>{}
+    const { login, loading } = useAuthStore();
+
     return (
         <form
             className='space-y-6'
             onSubmit={(e) => {
-                // e.preventDefault();
-                // login({ email, password });
+                e.preventDefault();
+                login({ email, password });
             }}
         >
             <div>

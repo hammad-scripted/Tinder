@@ -5,6 +5,8 @@ import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import { useAuthStore } from './store/useAuthStore';
 import { useEffect } from 'react';
+import {Toaster} from 'react-hot-toast'
+
 const App = () => {
   const { checkAuth, authUser, checkingAuth } = useAuthStore();
   useEffect(() => {
@@ -20,6 +22,7 @@ const App = () => {
           <Route path="/chat/:id" element={<ChatPage />} />
         </Route>
       </Routes>
+      <Toaster/>
     </div>
   );
 };

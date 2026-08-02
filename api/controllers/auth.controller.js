@@ -98,10 +98,28 @@ export const login = async (req, res, next) => {
         .json({ success: false, message: 'Email and password are required' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() }).select(
-      '+password',
-    );
-    if (!user || !(await user.comparePassword(password))) {
+    // const user = await User.findOne({ email: email }).select(
+    //   '+password',
+    // );
+    // if (!user || !(await user.comparePassword(password))) {
+    //   return res
+    //     .status(401)
+    //     .json({ success: false, message: 'Invalid email or password' });
+    // }
+    //? alternative way of doing the above
+    // Step 1: Find by email
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      console.warn(`Login failed: No user found with email ${email}`);
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid email or password' });
+    }
+
+    // Step 2: Check password
+    const isPasswordCorrect = await user.comparePassword(password);
+    if (!isPasswordCorrect) {
+      console.warn(`Login failed: Incorrect password for user ${email}`);
       return res
         .status(401)
         .json({ success: false, message: 'Invalid email or password' });
@@ -115,13 +133,11 @@ export const login = async (req, res, next) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: 'Login successful',
-        user: { id: user._id, name: user.name, email: user.email },
-      });
+    return res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      user: { id: user._id, name: user.name, email: user.email },
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: err.message });
