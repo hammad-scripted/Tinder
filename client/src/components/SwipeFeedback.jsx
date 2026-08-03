@@ -7,6 +7,7 @@ const getFeedbackStyle = (swipeFeedback) => {
 	return "";
 };
 
+
 const getFeedbackText = (swipeFeedback) => {
 	if (swipeFeedback === "liked") return "Liked!";
 	if (swipeFeedback === "passed") return "Passed";

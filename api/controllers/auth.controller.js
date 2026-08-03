@@ -113,7 +113,7 @@ export const login = async (req, res, next) => {
       console.warn(`Login failed: No user found with email ${email}`);
       return res
         .status(401)
-        .json({ success: false, message: 'Invalid email or password' });
+        .json({ success: false, message: 'User not found' });
     }
 
     // Step 2: Check password
