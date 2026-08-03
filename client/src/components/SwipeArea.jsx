@@ -13,26 +13,28 @@ const SwipeArea = () => {
     <div className="relative w-full max-w-sm h-[28rem]">
       {userProfiles.map((user) => (
         <TinderCard
-          className="absolute shadow-none"
+          className="absolute inset-0"
           key={user._id}
           onSwipe={(dir) => handleSwipe(dir, user)}
           swipeRequirementType="position"
           swipeThreshold={100}
           preventSwipe={['up', 'down']}
         >
-          <div className="card card-bordered bg-base-100 w-96 h-[28rem] select-none overflow-hidden shadow-xl">
+          <div
+            className="card bg-white w-96 h-[28rem] select-none rounded-lg overflow-hidden border border-gray-200 shadow-xl"
+          >
             <figure className="px-4 pt-4 h-3/4">
               <img
                 src={user.image || '/avatar.png'}
                 alt={user.name}
-                className="rounded-lg object-cover h-full pointer-events-none"
+                className="rounded-lg object-cover w-full h-full pointer-events-none"
               />
             </figure>
-            <div className="card-body bg-base-100">
-              <h2 className="card-title text-2xl">
+            <div className="card-body bg-gradient-to-b from-white to-pink-50 p-4">
+              <h2 className="card-title text-2xl text-gray-800">
                 {user.name}, {user.age}
               </h2>
-              <p>{user.bio}</p>
+              <p className="text-gray-600">{user.bio}</p>
             </div>
           </div>
         </TinderCard>
