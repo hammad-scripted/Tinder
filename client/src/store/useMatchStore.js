@@ -6,6 +6,7 @@ export const useMatchStore = create((set) => ({
   isLoadingMyMatches: false,
   isLoadingUserProfiles: false,
   userProfiles: [],
+  swipeFeedback: null,
 
   getMyMatches: async () => {
     try {
@@ -24,8 +25,11 @@ export const useMatchStore = create((set) => ({
     try {
       set({ isLoadingUserProfiles: true });
       const response = await axiosInstance.get('/matches/user-profiles');
-      set({ userProfiles: response.data.users, isLoadingMatches: false });
-      console.log(response.data.users)
+      set({
+        userProfiles: response.data.users,
+        isLoadingUserProfiles: false,
+      });
+      console.log(response.data.users);
     } catch (error) {
       console.error('Get User Profiles Error:', error);
       set({ isLoadingUserProfiles: false, matches: [] });
@@ -34,7 +38,39 @@ export const useMatchStore = create((set) => ({
       toast.error(errorMessage);
     }
   },
-  subscribeToNewMatches:async()=>{},
+  subscribeToNewMatches: async () => {},
 
-  unsubscribeFromNewMatches:async()=>{},
+  unsubscribeFromNewMatches: async () => {},
+  swipeLeft: async (user) => {
+    try {
+      set({ swipeFeedback: 'passed' });
+      await axiosInstance.post('/matches/swipe-left/' + user._id);
+    } catch (error) {
+      console.error('Swipe Left Error:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to swipe left';
+      set({ swipeFeedback: null });
+      toast.error(errorMessage);
+    } finally {
+      setTimeout(() => {
+        set({ swipeFeedback: null });
+      }, 1500);
+    }
+  },
+  swipeRight: async (user) => {
+    try {
+      set({ swipeFeedback: 'liked' });
+      await axiosInstance.post('/matches/swipe-right/' + user._id);
+    } catch (error) {
+      console.error('Swipe Right Error:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to swipe right';
+      set({ swipeFeedback: null });
+      toast.error(errorMessage);
+    } finally {
+      setTimeout(() => {
+        set({ swipeFeedback: null });
+      }, 1500);
+    }
+  },
 }));
