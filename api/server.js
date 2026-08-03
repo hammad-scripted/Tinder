@@ -11,8 +11,11 @@ import chalk from 'chalk';
 import { connectDB } from './db/connect.js';
 import cors from 'cors';
 import morgan from 'morgan';
+import {createServer} from 'http';
 const app = express();
+const httpServer = createServer(app);
 
+initializeWebSocketServer(httpServer);
 // ? MIDDLEWARES
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -48,7 +51,7 @@ const startServer = async () => {
     await connectDB();
 
     const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       console.log(chalk.blueBright(`Server running on port ${PORT}`));
     });
   } catch (err) {
