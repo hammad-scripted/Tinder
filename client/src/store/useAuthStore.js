@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
-
+import { initializeWebSocket } from '../socket/socket.client.js';
+import {disconnectSocket} from './socket/socket.client.js'
 export const useAuthStore = create((set) => ({
   //* states
   authUser: null,
@@ -42,7 +43,7 @@ export const useAuthStore = create((set) => ({
 
       const user = response.data.user || response.data;
       set({ authUser: user, loading: false });
-
+      initializeWebSocket(response.data.user._id);
       toast.success('Account created successfully!');
     } catch (error) {
       console.error('Signup Error:', error);
@@ -67,6 +68,7 @@ export const useAuthStore = create((set) => ({
 
       const user = response.data.user || response.data;
       set({ authUser: user, loading: false });
+      initializeWebSocket(response.data.user._id);
 
       toast.success('Logged in successfully');
     } catch (error) {
@@ -86,6 +88,7 @@ export const useAuthStore = create((set) => ({
     try {
       await axiosInstance.post('/auth/logout');
       set({ authUser: null });
+      disconnectSocket();
       toast.success('Logged out successfully');
     } catch (error) {
       console.error('Logout Error:', error);

@@ -4,7 +4,7 @@ const SOCKET_URL = 'http://localhost:5000';
 
 let socket = null;
 
-export const initializeWebSocketServer = () => {
+export const initializeWebSocket = (userId) => {
   if (socket) {
     socket.disconnect();
   }

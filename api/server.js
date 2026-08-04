@@ -12,6 +12,8 @@ import { connectDB } from './db/connect.js';
 import cors from 'cors';
 import morgan from 'morgan';
 import {createServer} from 'http';
+import { initializeWebSocketServer } from './socket/socket.server.js';
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -22,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.JWT_SECRET));
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: process.env.CLIENT_URL,
     credentials: true,
     methods: [
       'GET',
