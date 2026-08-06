@@ -21,10 +21,15 @@ import cors from 'cors';
 import morgan from 'morgan';
 import { createServer } from 'http';
 import { initializeWebSocketServer } from './socket/socket.server.js';
-
+import path from 'node:path';
 const app = express();
 const httpServer = createServer(app);
-const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', process.env.CLIENT_URL].filter(Boolean);
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  process.env.CLIENT_URL,
+].filter(Boolean);
+const __dirname = path.resolve();
 
 initializeWebSocketServer(httpServer);
 // ? MIDDLEWARES
@@ -59,7 +64,12 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/matches', matchesRouter);
 app.use('/api/messages', messagesRouter);
-
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '/client/dist')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'dist', 'index.html'));
+  })
+}
 // Return a useful JSON response when Express rejects an oversized request.
 app.use((err, req, res, next) => {
   if (err?.type === 'entity.too.large') {
