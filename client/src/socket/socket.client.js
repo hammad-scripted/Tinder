@@ -20,11 +20,12 @@ export const getSocket = () => {
   return socket;
 };
 
+export const getSocketIfInitialized = () => socket;
+
 export const disconnectSocket = () => {
   if (socket) {
     socket.disconnect();
     socket = null;
   }
   console.log('Socket disconnected');
-
 };

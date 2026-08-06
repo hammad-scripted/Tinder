@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { useAuthStore } from './useAuthStore';
-import {getSocket} from '../socket/socket.client.js';
+import { getSocket, getSocketIfInitialized } from '../socket/socket.client.js';
 import { toast } from 'react-hot-toast';
 import { axiosInstance } from '../lib/axios';
 
@@ -48,7 +48,8 @@ export const useMessageStore = create((set) => ({
     }
   },
   subscribeToMessages: () => {
-    const socket = getSocket();
+    const socket = getSocketIfInitialized();
+    if (!socket) return;
     socket.off('newMessage');
     socket.on('newMessage', (message) => {
       set((prevState) => ({
@@ -57,7 +58,8 @@ export const useMessageStore = create((set) => ({
     });
   },
   unsubscribeFromMessages: () => {
-    const socket = getSocket();
+    const socket = getSocketIfInitialized();
+    if (!socket) return;
     socket.off('newMessage');
   },
 }));

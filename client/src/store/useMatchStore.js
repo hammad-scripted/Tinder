@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import { toast } from 'react-hot-toast';
-import { getSocket } from '../socket/socket.client.js';
+import { getSocket, getSocketIfInitialized } from '../socket/socket.client.js';
 export const useMatchStore = create((set) => ({
   matches: [],
   isLoadingMyMatches: false,
@@ -41,7 +41,8 @@ export const useMatchStore = create((set) => ({
   },
   subscribeToNewMatches: async () => {
     try {
-      const socket = getSocket();
+      const socket = getSocketIfInitialized();
+      if (!socket) return;
       socket.off('newMatch');
       socket.on('newMatch', (newMatch) => {
         set((prevState) => ({
@@ -59,7 +60,8 @@ export const useMatchStore = create((set) => ({
 
   unsubscribeFromNewMatches: async () => {
     try {
-      const socket = getSocket();
+      const socket = getSocketIfInitialized();
+      if (!socket) return;
       socket.off('newMatch');
     } catch (error) {
       console.error('Unsubscribe from New Matches Error:', error);
