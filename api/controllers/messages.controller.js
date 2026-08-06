@@ -31,7 +31,7 @@ export const getConversation = async (req, res) => {
         { sender: req.user._id, receiver: userId },
         { sender: userId, receiver: req.user._id },
       ],
-    }).sort({ createdAt: -1 });
+    }).sort({ createdAt: 1 });
 
     return res.status(200).json({ success: true, messages });
   } catch (error) {
