@@ -13,10 +13,11 @@ export const useMatchStore = create((set) => ({
     try {
       set({ isLoadingMyMatches: true });
       const response = await axiosInstance.get('/matches');
-      set({ matches: response.data.matches, isLoadingMyMatches: false });
+      // Guarantee array fallback
+      set({ matches: response.data.matches || [], isLoadingMyMatches: false });
     } catch (error) {
       console.error('Get My Matches Error:', error);
-      set({ isLoadingMyMatches: false });
+      set({ isLoadingMyMatches: false, matches: [] });
       const errorMessage =
         error.response?.data?.message || 'Failed to get matches';
       toast.error(errorMessage);
@@ -27,6 +28,7 @@ export const useMatchStore = create((set) => ({
     try {
       set({ isLoadingUserProfiles: true });
       const response = await axiosInstance.get('/matches/user-profiles');
+      // Fallback guarantees matches is never undefined
       set({
         matches: response.data.matches || response.data.users || [],
         isLoadingUserProfiles: false,
@@ -47,7 +49,7 @@ export const useMatchStore = create((set) => ({
       socket.off('newMatch');
       socket.on('newMatch', (newMatch) => {
         set((prevState) => ({
-          matches: [...prevState.matches, newMatch],
+          matches: Array.isArray(prevState.matches) ? [...prevState.matches, newMatch] : [newMatch],
         }));
         toast.success("It's a match! 💕");
       });
@@ -70,9 +72,8 @@ export const useMatchStore = create((set) => ({
     try {
       set({ swipeFeedback: 'passed' });
 
-      // OPTIMIZATION: Optimistically remove swiped profile from matches deck
       set((state) => ({
-        matches: state.matches.filter((m) => m._id !== user._id),
+        matches: (state.matches || []).filter((m) => m._id !== user._id),
       }));
 
       await axiosInstance.post('/matches/swipe-left/' + user._id);
@@ -92,9 +93,8 @@ export const useMatchStore = create((set) => ({
     try {
       set({ swipeFeedback: 'liked' });
 
-      // OPTIMIZATION: Optimistically remove swiped profile from matches deck
       set((state) => ({
-        matches: state.matches.filter((m) => m._id !== user._id),
+        matches: (state.matches || []).filter((m) => m._id !== user._id),
       }));
 
       const response = await axiosInstance.post('/matches/swipe-right/' + user._id);
