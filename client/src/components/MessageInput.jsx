@@ -4,17 +4,17 @@ import { Send, Smile } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 
 const MessageInput = ({ match }) => {
-    const [message, setMessage] = useState("");
+    const [message, setMessages] = useState("");
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const emojiPickerRef = useRef(null);
 
-    const { sendMessage } = useMessageStore();
+    const { sendMessages } = useMessageStore();
 
     const handleSendMessage = (e) => {
         e.preventDefault();
         if (message.trim()) {
-            sendMessage(match._id, message);
-            setMessage("");
+            sendMessages(match._id, message);
+            setMessages("");
         }
     };
 
@@ -44,7 +44,7 @@ const MessageInput = ({ match }) => {
             <input
                 type='text'
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => setMessages(e.target.value)}
                 className='flex-grow p-3 pl-12 rounded-l-lg border-2 border-pink-500 
         focus:outline-none focus:ring-2 focus:ring-pink-300'
                 placeholder='Type a message...'
@@ -61,7 +61,7 @@ const MessageInput = ({ match }) => {
                 <div ref={emojiPickerRef} className='absolute bottom-20 left-4'>
                     <EmojiPicker
                         onEmojiClick={(emojiObject) => {
-                            setMessage((prevMessage) => prevMessage + emojiObject.emoji);
+                            setMessages((prevMessage) => prevMessage + emojiObject.emoji);
                         }}
                     />
                 </div>

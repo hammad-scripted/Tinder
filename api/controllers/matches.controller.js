@@ -63,7 +63,7 @@ export const swipeRight = async (req, res) => {
       return res.status(200).json({
         success: true,
         isMatch: true,
-        message: "It's a match!",
+        message: "It's a match 💕!",
       });
     } else {
       // 💖 NOT A MATCH YET: Just add likedUserId to currentUser's likes array

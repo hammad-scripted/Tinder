@@ -90,7 +90,7 @@ export const useMatchStore = create((set) => ({
       set({ swipeFeedback: 'liked' });
       const response = await axiosInstance.post('/matches/swipe-right/' + user._id);
       if (response.data?.isMatch) {
-        toast.success("It's a match!");
+        toast.success("It's a match 💕!");
       }
     } catch (error) {
       console.error('Swipe Right Error:', error);
