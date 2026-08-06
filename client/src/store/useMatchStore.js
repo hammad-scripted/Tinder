@@ -3,11 +3,10 @@ import { axiosInstance } from '../lib/axios';
 import { toast } from 'react-hot-toast';
 import { getSocketIfInitialized } from '../socket/socket.client.js';
 
-export const useMatchStore = create((set, get) => ({
+export const useMatchStore = create((set) => ({
   matches: [],
   isLoadingMyMatches: false,
   isLoadingUserProfiles: false,
-  userProfiles: [],
   swipeFeedback: null,
 
   getMyMatches: async () => {
@@ -29,13 +28,12 @@ export const useMatchStore = create((set, get) => ({
       set({ isLoadingUserProfiles: true });
       const response = await axiosInstance.get('/matches/user-profiles');
       set({
-        userProfiles: response.data.users || [],
+        matches: response.data.matches || response.data.users || [],
         isLoadingUserProfiles: false,
       });
     } catch (error) {
       console.error('Get User Profiles Error:', error);
-      // FIXED: Reset userProfiles on error, NOT matches
-      set({ isLoadingUserProfiles: false, userProfiles: [] });
+      set({ isLoadingUserProfiles: false, matches: [] });
       const errorMessage =
         error.response?.data?.message || 'Failed to get user profiles';
       toast.error(errorMessage);
@@ -71,10 +69,10 @@ export const useMatchStore = create((set, get) => ({
   swipeLeft: async (user) => {
     try {
       set({ swipeFeedback: 'passed' });
-      
-      // OPTIMISTIC UPDATE: Instantly filter out swiped user so card transitions smoothly
+
+      // OPTIMIZATION: Optimistically remove swiped profile from matches deck
       set((state) => ({
-        userProfiles: state.userProfiles.filter((p) => p._id !== user._id),
+        matches: state.matches.filter((m) => m._id !== user._id),
       }));
 
       await axiosInstance.post('/matches/swipe-left/' + user._id);
@@ -94,13 +92,13 @@ export const useMatchStore = create((set, get) => ({
     try {
       set({ swipeFeedback: 'liked' });
 
-      // OPTIMISTIC UPDATE: Instantly filter out swiped user
+      // OPTIMIZATION: Optimistically remove swiped profile from matches deck
       set((state) => ({
-        userProfiles: state.userProfiles.filter((p) => p._id !== user._id),
+        matches: state.matches.filter((m) => m._id !== user._id),
       }));
 
       const response = await axiosInstance.post('/matches/swipe-right/' + user._id);
-      
+
       if (response.data?.isMatch) {
         toast.success("It's a match! 💕");
       }
