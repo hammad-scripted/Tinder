@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import { toast } from 'react-hot-toast';
+import { getSocket } from '../socket/socket.client.js';
 export const useMatchStore = create((set) => ({
   matches: [],
   isLoadingMyMatches: false,
@@ -38,9 +39,36 @@ export const useMatchStore = create((set) => ({
       toast.error(errorMessage);
     }
   },
-  subscribeToNewMatches: async () => {},
+  subscribeToNewMatches: async () => {
+    try {
+      const socket = getSocket();
+      socket.off('newMatch');
+      socket.on('newMatch', (newMatch) => {
+        set((prevState) => ({
+          matches: [...prevState.matches, newMatch],
+        }));
+        toast.success('You got a new match!');
+      });
+    } catch (error) {
+      console.error('Subscribe to New Matches Error:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to subscribe to new matches';
+      toast.error(errorMessage);
+    }
+  },
 
-  unsubscribeFromNewMatches: async () => {},
+  unsubscribeFromNewMatches: async () => {
+    try {
+      const socket = getSocket();
+      socket.off('newMatch');
+    } catch (error) {
+      console.error('Unsubscribe from New Matches Error:', error);
+      const errorMessage =
+        error.response?.data?.message ||
+        'Failed to unsubscribe from new matches';
+      toast.error(errorMessage);
+    }
+  },
   swipeLeft: async (user) => {
     try {
       set({ swipeFeedback: 'passed' });
@@ -60,7 +88,10 @@ export const useMatchStore = create((set) => ({
   swipeRight: async (user) => {
     try {
       set({ swipeFeedback: 'liked' });
-      await axiosInstance.post('/matches/swipe-right/' + user._id);
+      const response = await axiosInstance.post('/matches/swipe-right/' + user._id);
+      if (response.data?.isMatch) {
+        toast.success("It's a match!");
+      }
     } catch (error) {
       console.error('Swipe Right Error:', error);
       const errorMessage =

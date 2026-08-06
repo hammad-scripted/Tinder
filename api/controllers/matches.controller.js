@@ -1,5 +1,5 @@
 import { User } from '../models/users.model.js';
-
+import { getConnectedUsers, getIO } from '../socket/socket.server.js';
 // ==========================================
 // 1. SWIPE RIGHT (Like / Match Logic)
 // ==========================================
@@ -10,9 +10,10 @@ export const swipeRight = async (req, res) => {
 
     // Prevent swiping on yourself
     if (currentUserId.toString() === likedUserId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "You cannot swipe right on yourself" });
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot swipe right on yourself',
+      });
     }
 
     const likedUser = await User.findById(likedUserId);
@@ -30,16 +31,35 @@ export const swipeRight = async (req, res) => {
       await Promise.all([
         User.findByIdAndUpdate(currentUserId, {
           $addToSet: { matches: likedUserId },
-          $pull: { likes: likedUserId }
+          $pull: { likes: likedUserId },
         }),
         User.findByIdAndUpdate(likedUserId, {
           $addToSet: { matches: currentUserId },
-          $pull: { likes: currentUserId }
-        })
+          $pull: { likes: currentUserId },
+        }),
       ]);
-
       // TODO: Send mutual match real-time notification (e.g., Socket.io)
 
+      //* send the notification to the matched users
+      const connectedUsers = getConnectedUsers();
+      const likedUserSocketId = connectedUsers.get(likedUserId.toString());
+      const io = getIO();
+      if (likedUserSocketId) {
+        io.to(likedUserSocketId).emit('newMatch', {
+          _id: currentUserId.toString(),
+          name: req.user.name,
+          profileImage: req.user.image,
+        });
+      }
+
+      const currentSocketId = connectedUsers.get(currentUserId.toString());
+      if (currentSocketId) {
+        io.to(currentSocketId).emit('newMatch', {
+          _id: likedUserId.toString(),
+          name: likedUser.name,
+          profileImage: likedUser.image,
+        });
+      }
       return res.status(200).json({
         success: true,
         isMatch: true,
@@ -48,7 +68,7 @@ export const swipeRight = async (req, res) => {
     } else {
       // 💖 NOT A MATCH YET: Just add likedUserId to currentUser's likes array
       await User.findByIdAndUpdate(currentUserId, {
-        $addToSet: { likes: likedUserId }
+        $addToSet: { likes: likedUserId },
       });
 
       // TODO: Send "someone liked you" notification to likedUser
@@ -77,12 +97,12 @@ export const swipeLeft = async (req, res) => {
     if (currentUserId.toString() === dislikedUserId) {
       return res
         .status(400)
-        .json({ success: false, message: "You cannot swipe left on yourself" });
+        .json({ success: false, message: 'You cannot swipe left on yourself' });
     }
 
     // Atomic update to add to dislikes array without duplication
     await User.findByIdAndUpdate(currentUserId, {
-      $addToSet: { dislikes: dislikedUserId }
+      $addToSet: { dislikes: dislikedUserId },
     });
 
     return res
@@ -103,11 +123,13 @@ export const getMatches = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate(
       'matches',
-      'name image bio age gender'
+      'name image bio age gender',
     );
 
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found' });
     }
 
     return res.status(200).json({ success: true, matches: user.matches });
@@ -127,7 +149,9 @@ export const getUserProfiles = async (req, res) => {
     const currentUser = await User.findById(req.user._id);
 
     if (!currentUser) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found' });
     }
 
     const users = await User.find({
@@ -149,8 +173,8 @@ export const getUserProfiles = async (req, res) => {
         },
       ],
     })
-    .select('-password -email') // Hide sensitive fields
-    .limit(20); // Prevent loading thousands of users at once
+      .select('-password -email') // Hide sensitive fields
+      .limit(20); // Prevent loading thousands of users at once
 
     return res.status(200).json({ success: true, count: users.length, users });
   } catch (err) {

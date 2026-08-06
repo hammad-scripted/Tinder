@@ -1,15 +1,22 @@
 import { Server } from 'socket.io';
 import http from 'http';
-import { config } from 'dotenv';
-config();
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import dotenv from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
 let io;
 const connectedUsers = new Map();
 //{ userId: socketId }
 export const initializeWebSocketServer = (server) => {
+  const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', process.env.CLIENT_URL].filter(Boolean);
+
   io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL,
+      origin: allowedOrigins,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
       credentials: true,
     },

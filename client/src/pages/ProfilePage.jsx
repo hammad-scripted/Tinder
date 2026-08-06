@@ -2,6 +2,37 @@ import { useRef, useState } from "react";
 import { Header } from "../components/Header";
 import { useAuthStore } from "../store/useAuthStore";
 import { useUserStore } from "../store/useUserStore";
+import { toast } from "react-hot-toast";
+
+const MAX_PROFILE_IMAGE_SIZE = 35 * 1024 * 1024;
+const MAX_IMAGE_DIMENSION = 1600;
+
+const compressImage = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(img.width, img.height));
+        canvas.width = Math.max(1, Math.floor(img.width * scale));
+        canvas.height = Math.max(1, Math.floor(img.height * scale));
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        resolve(compressedDataUrl);
+      };
+      img.onerror = () => reject(new Error('Unable to read image'));
+      img.src = reader.result;
+    };
+
+    reader.onerror = () => reject(new Error('Unable to read image'));
+    reader.readAsDataURL(file);
+  });
+};
 
 const ProfilePage = () => {
   const { authUser } = useAuthStore();
@@ -22,15 +53,21 @@ const ProfilePage = () => {
   };
 
   // base64 image logic
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result);
-      };
+      if (file.size > MAX_PROFILE_IMAGE_SIZE) {
+        toast.error('Please choose an image smaller than 35 MB.');
+        e.target.value = '';
+        return;
+      }
 
-      reader.readAsDataURL(file);
+      try {
+        const compressedImage = await compressImage(file);
+        setImage(compressedImage);
+      } catch (error) {
+        toast.error('Could not process the selected image.');
+      }
     }
   };
 

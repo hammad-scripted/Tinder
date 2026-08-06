@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
 import { initializeWebSocket } from '../socket/socket.client.js';
-import {disconnectSocket} from './socket/socket.client.js'
+import {disconnectSocket} from '../socket/socket.client.js'
 export const useAuthStore = create((set) => ({
   //* states
   authUser: null,
@@ -20,6 +20,7 @@ export const useAuthStore = create((set) => ({
       // Extract user object safely (handles response.data.user or response.data)
       const user = response.data.user || response.data;
       set({ authUser: user, checkingAuth: false, loading: false});
+      initializeWebSocket(response.data.user._id);
     } catch (error) {
       console.error('CheckAuth Error:', error);
       set({ authUser: null, checkingAuth: false });
@@ -28,7 +29,7 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  // 2. Signup Action
+  //? 2. Signup Action
   signup: async ({ name, email, password, age, gender, genderPreference }) => {
     try {
       set({ loading: true });
@@ -57,7 +58,7 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  // 3. Login Action
+  //? 3. Login Action
   login: async ({ email, password }) => {
     try {
       set({ loading: true });
@@ -83,7 +84,7 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  // 4. Logout Action
+  //? 4. Logout Action
   logout: async () => {
     try {
       await axiosInstance.post('/auth/logout');
