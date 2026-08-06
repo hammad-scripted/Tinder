@@ -174,7 +174,7 @@ export const getUserProfiles = async (req, res) => {
       ],
     })
       .select('-password -email') // Hide sensitive fields
-      .limit(20); // Prevent loading thousands of users at once
+      .limit(50); // Prevent loading thousands of users at once
 
     return res.status(200).json({ success: true, count: users.length, users });
   } catch (err) {
