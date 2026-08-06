@@ -40,7 +40,9 @@ const ProfilePage = () => {
   const [bio, setBio] = useState(authUser.bio || "");
   const [age, setAge] = useState(authUser.age || "");
   const [gender, setGender] = useState(authUser.gender || "");
-  const [genderPreference, setGenderPreference] = useState(authUser.genderPreference || []);
+  const [genderPreference, setGenderPreference] = useState(
+    authUser.genderPreference || "",
+  );
   const [image, setImage] = useState(authUser.image || null);
 
   const fileInputRef = useRef(null);
@@ -149,9 +151,11 @@ const ProfilePage = () => {
                   {["Male", "Female", "Both"].map((option) => (
                     <label key={option} className='inline-flex items-center'>
                       <input
-                        type='checkbox'
-                        className='form-checkbox text-pink-600'
-                        checked={genderPreference.toLowerCase() === option.toLowerCase()}
+                        type='radio'
+                        className='form-radio text-pink-600'
+                        name='genderPreference'
+                        value={option.toLowerCase()}
+                        checked={genderPreference === option.toLowerCase()}
                         onChange={() => setGenderPreference(option.toLowerCase())}
                       />
                       <span className='ml-2'>{option}</span>

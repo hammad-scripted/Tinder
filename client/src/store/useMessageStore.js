@@ -14,9 +14,9 @@ export const useMessageStore = create((set) => ({
         messages: [
           ...prevState.messages,
           {
-            senderId: useAuthStore.getState().authUser._id,
-            receiverId,
-            content,
+            sender: useAuthStore.getState().authUser._id,
+            receiver: receiverId,
+            message: content,
           },
         ],
       }));
@@ -49,6 +49,7 @@ export const useMessageStore = create((set) => ({
   },
   subscribeToMessages: () => {
     const socket = getSocket();
+    socket.off('newMessage');
     socket.on('newMessage', (message) => {
       set((prevState) => ({
         messages: [...prevState.messages, message],

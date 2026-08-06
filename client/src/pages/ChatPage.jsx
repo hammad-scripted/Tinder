@@ -48,22 +48,26 @@ const ChatPage = () => {
           {messages.length === 0 ? (
             <p className='text-center text-gray-500 py-8'>Start your conversation with {match.name}</p>
           ) : (
-            messages.map((msg) => (
-              <div
-                key={msg._id}
-                className={`mb-3 ${msg.sender === authUser._id ? "text-right" : "text-left"}`}
-              >
-                <span
-                  className={`inline-block p-3 rounded-lg max-w-xs lg:max-w-md ${
-                    msg.sender === authUser._id
-                      ? "bg-pink-500 text-white"
-                      : "bg-gray-200 text-gray-800"
-                  }`}
+            messages.map((msg) => {
+              const senderId = typeof msg.sender === 'object' ? msg.sender?._id : msg.sender;
+              const isMyMessage = senderId === authUser._id;
+              return (
+                <div
+                  key={msg._id}
+                  className={`mb-3 ${isMyMessage ? "text-right" : "text-left"}`}
                 >
-                  {msg.content}
-                </span>
-              </div>
-            ))
+                  <span
+                    className={`inline-block p-3 rounded-lg max-w-xs lg:max-w-md ${
+                      isMyMessage
+                        ? "bg-pink-500 text-white"
+                        : "bg-gray-200 text-gray-800"
+                    }`}
+                  >
+                    {msg.message}
+                  </span>
+                </div>
+              );
+            })
           )}
         </div>
         <MessageInput match={match} />

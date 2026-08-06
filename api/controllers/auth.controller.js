@@ -133,10 +133,12 @@ export const login = async (req, res, next) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
+    const userResponse = await User.findById(user._id).select('-password');
+
     return res.status(200).json({
       success: true,
       message: 'Login successful',
-      user: { id: user._id, name: user.name, email: user.email },
+      user: userResponse,
     });
   } catch (err) {
     console.error(err);
