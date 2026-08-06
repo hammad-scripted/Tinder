@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import { toast } from 'react-hot-toast';
-import { getSocket, getSocketIfInitialized } from '../socket/socket.client.js';
-export const useMatchStore = create((set) => ({
+import { getSocketIfInitialized } from '../socket/socket.client.js';
+
+export const useMatchStore = create((set, get) => ({
   matches: [],
   isLoadingMyMatches: false,
   isLoadingUserProfiles: false,
@@ -22,23 +23,25 @@ export const useMatchStore = create((set) => ({
       toast.error(errorMessage);
     }
   },
+
   getUserProfiles: async () => {
     try {
       set({ isLoadingUserProfiles: true });
       const response = await axiosInstance.get('/matches/user-profiles');
       set({
-        userProfiles: response.data.users,
+        userProfiles: response.data.users || [],
         isLoadingUserProfiles: false,
       });
-      console.log(response.data.users);
     } catch (error) {
       console.error('Get User Profiles Error:', error);
-      set({ isLoadingUserProfiles: false, matches: [] });
+      // FIXED: Reset userProfiles on error, NOT matches
+      set({ isLoadingUserProfiles: false, userProfiles: [] });
       const errorMessage =
         error.response?.data?.message || 'Failed to get user profiles';
       toast.error(errorMessage);
     }
   },
+
   subscribeToNewMatches: async () => {
     try {
       const socket = getSocketIfInitialized();
@@ -48,13 +51,10 @@ export const useMatchStore = create((set) => ({
         set((prevState) => ({
           matches: [...prevState.matches, newMatch],
         }));
-        toast.success('You got a new match!');
+        toast.success("It's a match! 💕");
       });
     } catch (error) {
       console.error('Subscribe to New Matches Error:', error);
-      const errorMessage =
-        error.response?.data?.message || 'Failed to subscribe to new matches';
-      toast.error(errorMessage);
     }
   },
 
@@ -65,45 +65,54 @@ export const useMatchStore = create((set) => ({
       socket.off('newMatch');
     } catch (error) {
       console.error('Unsubscribe from New Matches Error:', error);
-      const errorMessage =
-        error.response?.data?.message ||
-        'Failed to unsubscribe from new matches';
-      toast.error(errorMessage);
     }
   },
+
   swipeLeft: async (user) => {
     try {
       set({ swipeFeedback: 'passed' });
+      
+      // OPTIMISTIC UPDATE: Instantly filter out swiped user so card transitions smoothly
+      set((state) => ({
+        userProfiles: state.userProfiles.filter((p) => p._id !== user._id),
+      }));
+
       await axiosInstance.post('/matches/swipe-left/' + user._id);
     } catch (error) {
       console.error('Swipe Left Error:', error);
       const errorMessage =
         error.response?.data?.message || 'Failed to swipe left';
-      set({ swipeFeedback: null });
       toast.error(errorMessage);
     } finally {
       setTimeout(() => {
         set({ swipeFeedback: null });
-      }, 1500);
+      }, 500);
     }
   },
+
   swipeRight: async (user) => {
     try {
       set({ swipeFeedback: 'liked' });
+
+      // OPTIMISTIC UPDATE: Instantly filter out swiped user
+      set((state) => ({
+        userProfiles: state.userProfiles.filter((p) => p._id !== user._id),
+      }));
+
       const response = await axiosInstance.post('/matches/swipe-right/' + user._id);
+      
       if (response.data?.isMatch) {
-        toast.success("It's a match 💕!");
+        toast.success("It's a match! 💕");
       }
     } catch (error) {
       console.error('Swipe Right Error:', error);
       const errorMessage =
         error.response?.data?.message || 'Failed to swipe right';
-      set({ swipeFeedback: null });
       toast.error(errorMessage);
     } finally {
       setTimeout(() => {
         set({ swipeFeedback: null });
-      }, 1500);
+      }, 500);
     }
   },
 }));
